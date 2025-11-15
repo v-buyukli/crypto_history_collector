@@ -7,5 +7,10 @@ FastAPI application for collecting historical cryptocurrency exchange data.
 - clone repository
 - create and activate virtual environment (poetry)
 - `poetry install`
-- fill env variables (`.env`)
 - `poetry run uvicorn src.main:app --reload`
+
+## Links
+
+- **Home**: http://localhost:8000/
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
