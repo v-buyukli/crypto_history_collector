@@ -1,5 +1,6 @@
 """FastAPI application with embedded Streamlit."""
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from jinja2 import Template
 from src.api.routes import base
 from src.config import settings
 from src.ui import StreamlitManager
+
+logger = logging.getLogger(__name__)
 
 # Initialize Streamlit manager
 streamlit_manager = StreamlitManager(
@@ -27,18 +30,33 @@ async def lifespan(app: FastAPI):
     global _wrapper_template
 
     # Startup: start Streamlit subprocess
+    logger.info("Starting Streamlit subprocess...")
     streamlit_manager.start()
 
     # Load and cache wrapper template
-    templates_path = Path(__file__).parent / "ui" / "templates"
-    wrapper_file = templates_path / "streamlit_wrapper.html"
-    template_content = wrapper_file.read_text(encoding="utf-8")
-    _wrapper_template = Template(template_content)
+    logger.info("Loading wrapper template...")
+    try:
+        templates_path = Path(__file__).parent / "ui" / "templates"
+        wrapper_file = templates_path / "streamlit_wrapper.html"
+
+        if not wrapper_file.exists():
+            raise FileNotFoundError(f"Template file not found: {wrapper_file}")
+
+        template_content = wrapper_file.read_text(encoding="utf-8")
+        _wrapper_template = Template(template_content)
+        logger.info("Wrapper template loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load wrapper template: {e}")
+        raise
+
+    logger.info("Application startup complete")
 
     yield
 
     # Shutdown: gracefully stop Streamlit subprocess
+    logger.info("Stopping Streamlit subprocess...")
     await streamlit_manager.stop()
+    logger.info("Application shutdown complete")
 
 
 app = FastAPI(
@@ -59,5 +77,9 @@ app.include_router(base.router)
 @app.get("/", response_class=HTMLResponse, tags=["Root"])
 async def root() -> HTMLResponse:
     """Root endpoint serving Streamlit iframe wrapper."""
+    if _wrapper_template is None:
+        logger.error("Wrapper template not loaded")
+        raise RuntimeError("Wrapper template not loaded")
+
     rendered_html = _wrapper_template.render(streamlit_url=settings.streamlit_url)
     return HTMLResponse(content=rendered_html)

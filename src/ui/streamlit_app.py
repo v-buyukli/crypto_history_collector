@@ -1,5 +1,7 @@
 """Streamlit UI for Crypto History Collector."""
 
+from pathlib import Path
+
 import streamlit as st
 
 from src.config import settings
@@ -14,116 +16,46 @@ st.set_page_config(
     layout="wide",
 )
 
-# Custom CSS for improved styling
-st.markdown(
-    """
-    <style>
-    /* Hide Streamlit header and footer */
-    header[data-testid="stHeader"] {
-        display: none;
-    }
-    footer {
-        display: none;
-    }
-    #MainMenu {
-        display: none;
-    }
-    .stDeployButton {
-        display: none;
-    }
 
-    /* Remove ALL bottom spacing - comprehensive approach */
-    .main .block-container {
-        padding-bottom: 0 !important;
-        padding-top: 2rem !important;
-        margin-bottom: 0 !important;
-    }
+# Load custom CSS from external file
+def load_css():
+    """Load custom CSS from .streamlit/custom.css file."""
+    css_file = Path(__file__).parent.parent.parent / ".streamlit" / "custom.css"
+    if css_file.exists():
+        css_content = css_file.read_text(encoding="utf-8")
+        st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
 
-    .main {
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-    }
 
-    /* Target Streamlit's vertical block containers */
-    section[data-testid="stVerticalBlock"] {
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-    }
+load_css()
 
-    section[data-testid="stVerticalBlock"] > div:last-child {
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-    }
 
-    /* Remove spacing from last element */
-    .element-container:last-child {
-        margin-bottom: 0 !important;
-    }
+# Helper functions for rendering cards
+def render_feature_card(icon: str, title: str, description: str) -> None:
+    """Render a feature card with icon, title and description."""
+    st.markdown(
+        f"""
+        <div class="feature-card">
+            <div class="feature-icon">{icon}</div>
+            <div class="feature-title">{title}</div>
+            <div class="feature-desc">{description}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    /* Reduce remaining space moderately */
-    .stMarkdown:last-of-type {
-        margin-bottom: 0 !important;
-    }
 
-    /* Feature card styling */
-    .feature-card {
-        padding: 30px 20px;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        text-align: center;
-        min-height: 260px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        background: rgba(30, 41, 59, 0.3);
-    }
-    .feature-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
-    }
-    .feature-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 12px;
-        color: #f8fafc;
-    }
-    .feature-desc {
-        font-size: 14px;
-        color: #94a3b8;
-        line-height: 1.6;
-    }
+def render_exchange_card(name: str, logo_url: str) -> None:
+    """Render an exchange card with logo and name."""
+    st.markdown(
+        f"""
+        <div class="exchange-card">
+            <img src="{logo_url}" width="80" alt="{name}">
+            <div class="exchange-name">{name}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    /* Exchange card styling */
-    .exchange-card {
-        padding: 24px;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        text-align: center;
-        background: rgba(30, 41, 59, 0.3);
-    }
-    .exchange-card img {
-        margin-bottom: 12px;
-    }
-    .exchange-name {
-        font-size: 16px;
-        font-weight: 600;
-        color: #f8fafc;
-    }
-
-    /* Logo styling */
-    .logo-container {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .logo-icon {
-        width: 40px;
-        height: 40px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # Header: Logo + Title + Status badge
 col1, col2 = st.columns([4, 1])
@@ -151,10 +83,11 @@ with col1:
 with col2:
     st.markdown(
         """
-        <div style='display:flex; align-items:center; gap:8px; justify-content:flex-end;'>
-            <span style='width:8px; height:8px; background:#10b981;
+        <div style='display:flex; align-items:center; gap:10px; justify-content:flex-end;
+                    margin-top: 30px;'>
+            <span style='width:10px; height:10px; background:#10b981;
                          border-radius:50%; display:inline-block;'></span>
-            <span>Online</span>
+            <span style='font-size: 16px; font-weight: 500;'>Online</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -166,54 +99,34 @@ st.markdown("---")
 st.markdown("# Historical Cryptocurrency Exchange Data Collection")
 st.markdown("#### Tool for collecting historical data from cryptocurrency exchanges")
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.write("")  # Spacer
 
 # Features section with improved cards
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
-    st.markdown(
-        """
-        <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <div class="feature-title">Historical OHLC Collection</div>
-            <div class="feature-desc">
-                Collect OHLC candlestick data with volume from cryptocurrency exchanges
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    render_feature_card(
+        icon="📊",
+        title="Historical OHLC Collection",
+        description="Collect OHLC candlestick data with volume from cryptocurrency exchanges",
     )
 
 with col2:
-    st.markdown(
-        """
-        <div class="feature-card">
-            <div class="feature-icon">⏱️</div>
-            <div class="feature-title">Multiple Timeframes</div>
-            <div class="feature-desc">
-                Support for various timeframes: 1h, 4h, 1d
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    render_feature_card(
+        icon="⏱️",
+        title="Multiple Timeframes",
+        description="Support for various timeframes: 1h, 4h, 1d",
     )
 
 with col3:
-    st.markdown(
-        """
-        <div class="feature-card">
-            <div class="feature-icon">🔌</div>
-            <div class="feature-title">RESTful API</div>
-            <div class="feature-desc">
-                Access collected historical data through a simple REST API
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    render_feature_card(
+        icon="🔌",
+        title="RESTful API",
+        description="Access collected historical data through a simple REST API",
     )
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+st.write("")
+st.write("")  # Double spacer
 
 # Exchanges section with improved cards
 st.markdown("### Supported Exchanges")
@@ -221,44 +134,25 @@ st.markdown("### Supported Exchanges")
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
-    st.markdown(
-        f"""
-        <div class="exchange-card">
-            <img src="{FASTAPI_URL}/static/images/binance.svg" width="80" alt="Binance">
-            <div class="exchange-name">Binance</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    render_exchange_card(
+        name="Binance", logo_url=f"{FASTAPI_URL}/static/images/binance.svg"
     )
 
 with col2:
-    st.markdown(
-        f"""
-        <div class="exchange-card">
-            <img src="{FASTAPI_URL}/static/images/bybit.svg" width="80" alt="Bybit">
-            <div class="exchange-name">Bybit</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    render_exchange_card(
+        name="Bybit", logo_url=f"{FASTAPI_URL}/static/images/bybit.svg"
     )
 
 with col3:
-    st.markdown(
-        f"""
-        <div class="exchange-card">
-            <img src="{FASTAPI_URL}/static/images/okx.svg" width="80" alt="OKX">
-            <div class="exchange-name">OKX</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    render_exchange_card(name="OKX", logo_url=f"{FASTAPI_URL}/static/images/okx.svg")
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+st.write("")
+st.write("")  # Double spacer
 
 # Footer
 st.markdown("---")
 st.markdown(
-    "<div style='text-align:center; color:#94a3b8; margin-top: 10pxJr; margin-bottom: -100px; padding-bottom: 0;'>"  # noqa: E501
-    "&copy; 2025 Crypto History Collector v0.1.0</div>",
+    "<div style='text-align: center;'><p style='color: #94a3b8; margin-top: 10px;'>"
+    "© 2025 Crypto History Collector v0.1.0</p></div>",
     unsafe_allow_html=True,
 )
