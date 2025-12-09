@@ -1,29 +1,25 @@
-[project]
+[tool.poetry]
 name = "crypto-history-collector"
 version = "0.1.0"
 description = "Crypto History Collector"
-authors = [
-    {name = "vktr",email = "vktr.buyukli@gmail.com"}
-]
+authors = ["vktr <vktr.buyukli@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "fastapi (>=0.121.1,<0.122.0)",
-    "uvicorn[standard] (>=0.38.0,<0.39.0)",
-    "streamlit (>=1.52.0,<2.0.0)",
-    "jinja2 (>=3.1.0,<4.0.0)",
-    "pydantic-settings (>=2.0.0,<3.0.0)"
-]
+packages = [{include = "src"}]
 
+[tool.poetry.dependencies]
+python = ">=3.12"
+fastapi = ">=0.121.1,<0.122.0"
+uvicorn = {extras = ["standard"], version = ">=0.38.0,<0.39.0"}
+streamlit = ">=1.52.0,<2.0.0"
+jinja2 = ">=3.1.0,<4.0.0"
+pydantic-settings = ">=2.0.0,<3.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "4.3.0"
+black = ">=25.11.0,<26.0.0"
+isort = ">=7.0.0,<8.0.0"
+flake8 = ">=7.3.0,<8.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[dependency-groups]
-dev = [
-    "pre-commit (==4.3.0)",
-    "black (>=25.11.0,<26.0.0)",
-    "isort (>=7.0.0,<8.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)"
-]

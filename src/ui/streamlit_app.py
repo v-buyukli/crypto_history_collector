@@ -1,5 +1,3 @@
-"""Streamlit UI for Crypto History Collector."""
-
 from pathlib import Path
 
 import streamlit as st
@@ -9,10 +7,13 @@ from src.config import settings
 # Get FastAPI URL from settings
 FASTAPI_URL = settings.fastapi_url
 
+# Get favicon path
+FAVICON_PATH = Path(__file__).parent / "static" / "images" / "favicon.svg"
+
 # Page configuration
 st.set_page_config(
     page_title="Crypto History Collector",
-    page_icon="📊",
+    page_icon=str(FAVICON_PATH),
     layout="wide",
 )
 
