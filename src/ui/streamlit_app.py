@@ -20,8 +20,8 @@ st.set_page_config(
 
 # Load custom CSS from external file
 def load_css():
-    """Load custom CSS from .streamlit/custom.css file."""
-    css_file = Path(__file__).parent.parent.parent / ".streamlit" / "custom.css"
+    """Load custom CSS from static/css/custom.css file."""
+    css_file = Path(__file__).parent / "static" / "css" / "custom.css"
     if css_file.exists():
         css_content = css_file.read_text(encoding="utf-8")
         st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
