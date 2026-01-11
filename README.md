@@ -6,7 +6,7 @@ FastAPI application for collecting historical cryptocurrency exchange data.
 
 The easiest way to run the application is with Docker. Make sure you have Docker and Docker Compose installed.
 
-1.  **Clone the repository**
+1.  **Clone the repository.**
 2.  **Build and run the services:**
     ```bash
     docker compose up --build
@@ -18,13 +18,8 @@ This will start both the backend and frontend services.
 
 If you prefer to run the application locally without Docker, follow these steps.
 
-1.  **Clone the repository and create a virtual environment**
-2.  **Install dependencies using Poetry:**
-    ```bash
-    pip install poetry
-    poetry install
-    ```
-
+1.  **Clone the repository and create a virtual environment.**
+2.  **Install dependencies using Poetry.**
 3.  **Run the services:**
 
     *   **Backend (FastAPI):**

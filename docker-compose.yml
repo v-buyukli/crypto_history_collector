@@ -1,12 +1,36 @@
+x-common-env: &common-env
+  env_file:
+    - ./.env
+
 services:
+  db:
+    <<: *common-env
+    image: postgres:15
+    container_name: crypto_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
   backend:
+    <<: *common-env
     build: .
+    environment:
+      - POSTGRES_HOST=db
     ports:
       - "8000:8000"
     command: poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - db
 
   frontend:
+    <<: *common-env
     build: .
     ports:
       - "8501:8501"
     command: poetry run streamlit run src/ui/streamlit_app.py
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
