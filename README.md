@@ -2,23 +2,44 @@
 
 FastAPI application for collecting historical cryptocurrency exchange data.
 
-## Setup & Run
+## Running with Docker (Recommended)
 
-- clone repository
-- create and activate virtual environment (poetry)
-- `poetry install`
+The easiest way to run the application is with Docker. Make sure you have Docker and Docker Compose installed.
 
-### Backend (FastAPI)
-```bash
-poetry run uvicorn src.main:app --reload
-```
+1.  **Clone the repository**
+2.  **Build and run the services:**
+    ```bash
+    docker compose up --build
+    ```
 
-### Frontend (Streamlit)
-```bash
-poetry run streamlit run src/ui/streamlit_app.py
-```
+This will start both the backend and frontend services.
+
+## Local Development Setup
+
+If you prefer to run the application locally without Docker, follow these steps.
+
+1.  **Clone the repository and create a virtual environment**
+2.  **Install dependencies using Poetry:**
+    ```bash
+    pip install poetry
+    poetry install
+    ```
+
+3.  **Run the services:**
+
+    *   **Backend (FastAPI):**
+        ```bash
+        poetry run uvicorn src.main:app --reload
+        ```
+
+    *   **Frontend (Streamlit):**
+        ```bash
+        poetry run streamlit run src/ui/streamlit_app.py
+        ```
 
 ## Links
+
+Once the application is running, you can access the services at the following URLs:
 
 ### Backend API
 - **API Info**: http://localhost:8000/
@@ -28,9 +49,3 @@ poetry run streamlit run src/ui/streamlit_app.py
 
 ### Frontend UI
 - **Streamlit App**: http://localhost:8501
-
-## Notes
-
-- Backend и Frontend запускаются независимо
-- Запустите оба сервиса в разных терминалах
-- Backend должен быть запущен, если Frontend обращается к API
