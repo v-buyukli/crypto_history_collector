@@ -14,6 +14,16 @@ class Exchange(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False)
 
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
     candles = relationship("Candle", back_populates="exchange")
 
     def __repr__(self):
@@ -28,10 +38,44 @@ class MarketType(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False)
 
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
     candles = relationship("Candle", back_populates="market_type")
 
     def __repr__(self):
         return f"<MarketType(id={self.id}, name={self.name})>"
+
+
+class Symbol(Base):
+    """Symbol model for trading pairs (e.g., BTCUSDT, ETHUSDT)."""
+
+    __tablename__ = "symbols"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), unique=True, nullable=False)
+
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    candles = relationship("Candle", back_populates="symbol")
+
+    def __repr__(self):
+        return f"<Symbol(id={self.id}, name={self.name})>"
 
 
 class Candle(Base):
@@ -43,8 +87,7 @@ class Candle(Base):
 
     exchange_id = Column(Integer, ForeignKey("exchanges.id"), nullable=False)
     market_type_id = Column(Integer, ForeignKey("market_types.id"), nullable=False)
-
-    symbol = Column(String(100), nullable=False)
+    symbol_id = Column(Integer, ForeignKey("symbols.id"), nullable=False)
     timeframe = Column(String(10), nullable=False)
     timestamp = Column(DateTime, nullable=False)
 
@@ -57,9 +100,17 @@ class Candle(Base):
     created_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
 
     exchange = relationship("Exchange", back_populates="candles")
     market_type = relationship("MarketType", back_populates="candles")
+    symbol = relationship("Symbol", back_populates="candles")
 
     def __repr__(self):
-        return f"<Candle(symbol={self.symbol}, timeframe={self.timeframe}, timestamp={self.timestamp})>"
+        symbol_name = self.symbol.name if self.symbol else None
+        return f"<Candle(symbol={symbol_name}, timeframe={self.timeframe}, timestamp={self.timestamp})>"

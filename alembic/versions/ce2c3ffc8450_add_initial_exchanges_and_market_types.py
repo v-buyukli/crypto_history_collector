@@ -8,8 +8,6 @@ Create Date: 2026-01-12 10:57:37.959687
 
 from typing import Sequence, Union
 
-from sqlalchemy import String, column, table
-
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -21,26 +19,22 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Add initial data."""
-    exchanges_table = table("exchanges", column("name", String))
-    market_types_table = table("market_types", column("name", String))
-
     # Insert exchanges
-    op.bulk_insert(
-        exchanges_table,
-        [
-            {"name": "binance"},
-            {"name": "bybit"},
-            {"name": "okx"},
-        ],
+    op.execute(
+        """
+        INSERT INTO exchanges (name)
+        VALUES ('binance'), ('bybit')
+        ON CONFLICT (name) DO NOTHING;
+    """
     )
 
     # Insert market types
-    op.bulk_insert(
-        market_types_table,
-        [
-            {"name": "spot"},
-            {"name": "futures"},
-        ],
+    op.execute(
+        """
+        INSERT INTO market_types (name)
+        VALUES ('spot'), ('futures')
+        ON CONFLICT (name) DO NOTHING;
+    """
     )
 
 
