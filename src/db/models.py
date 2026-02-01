@@ -41,7 +41,7 @@ class Exchange(Base):
 
 
 class MarketType(Base):
-    """Market type model for different trading markets (spot, futures, etc)."""
+    """Market type model for different trading markets (spot, futures)."""
 
     __tablename__ = "market_types"
 

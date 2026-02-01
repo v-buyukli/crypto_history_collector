@@ -4,6 +4,7 @@ import streamlit as st
 
 from src.config import settings
 
+
 # Get FastAPI URL from settings
 FASTAPI_URL = settings.fastapi_url
 
@@ -154,6 +155,6 @@ st.write("")  # Double spacer
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center;'><p style='color: #94a3b8; margin-top: 10px;'>"
-    "© 2025 Crypto History Collector v0.1.0</p></div>",
+    "© 2026 Crypto History Collector v0.1.0</p></div>",
     unsafe_allow_html=True,
 )

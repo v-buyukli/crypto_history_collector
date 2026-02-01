@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from src.api.routes import base
 
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI(

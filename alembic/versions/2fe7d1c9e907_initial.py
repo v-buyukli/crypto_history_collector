@@ -12,6 +12,7 @@ import sqlalchemy as sa
 
 from alembic import op
 
+
 # revision identifiers, used by Alembic.
 revision: str = "2fe7d1c9e907"
 down_revision: Union[str, None] = None
@@ -100,7 +101,8 @@ def upgrade() -> None:
         INSERT INTO exchanges (name, created_at, updated_at)
         VALUES
             ('binance', NOW(), NOW()),
-            ('bybit', NOW(), NOW())
+            ('bybit', NOW(), NOW()),
+            ('okx', NOW(), NOW())
         """
     )
 
