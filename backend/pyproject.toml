@@ -1,0 +1,41 @@
+[project]
+name = "crypto-history-collector"
+version = "0.1.0"
+description = "Crypto History Collector"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "vktr", email = "vktr4work@gmail.com"}
+]
+
+dependencies = [
+    "fastapi>=0.121.1,<0.122.0",
+    "uvicorn[standard]>=0.38.0,<0.39.0",
+    "jinja2>=3.1.0,<4.0.0",
+    "pydantic-settings>=2.0.0,<3.0.0",
+    "alembic (>=1.18.0,<2.0.0)",
+    "sqlalchemy (>=2.0.45,<3.0.0)",
+    "pg8000 (>=1.31.5,<2.0.0)",
+    "httpx>=0.28.0,<1.0.0",
+    "asyncpg (>=0.31.0,<0.32.0)",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit==4.3.0",
+    "black>=25.11.0,<26.0.0",
+    "isort>=7.0.0,<8.0.0",
+    "flake8>=7.3.0,<8.0.0",
+]
+
+[tool.poetry]
+packages = [{include = "app"}]
+
+[tool.isort]
+known_first_party = ["app"]
+known_third_party = ["alembic"]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
