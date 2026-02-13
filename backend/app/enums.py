@@ -5,6 +5,7 @@ class ExchangeEnum(StrEnum):
     """Supported exchanges."""
 
     BINANCE = "binance"
+    BYBIT = "bybit"
 
 
 class MarketTypeEnum(StrEnum):
