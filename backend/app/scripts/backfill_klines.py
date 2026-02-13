@@ -16,8 +16,8 @@ from app.repositories.klines import KlinesRepository
 # ── Configuration ──────────────────────────────────────────────
 SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
 TIMEFRAME = TimeframeEnum.h1
-START_TIME = datetime(2025, 1, 1)
-END_TIME = datetime(2026, 1, 1)  # None = up to now
+START_TIME = datetime(2019, 1, 1)
+END_TIME = datetime(2026, 2, 10)  # None = up to now
 EXCHANGE = ExchangeEnum.BINANCE
 MARKET_TYPE = MarketTypeEnum.FUTURES
 # ───────────────────────────────────────────────────────────────

@@ -118,6 +118,8 @@ class BinanceClient(BaseExchangeClient):
                 # Next page starts 1ms after the last candle's open time
                 last_open_time_ms = data[-1][0]
                 current_start = datetime.fromtimestamp((last_open_time_ms + 1) / 1000)
+                if end_time and current_start >= end_time:
+                    break
 
         return all_klines
 

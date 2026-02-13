@@ -106,10 +106,10 @@ class BybitClient(BaseExchangeClient):
                 if len(data) < self._PAGE_LIMIT:
                     break
 
-                # Bybit returns newest first — last element is the oldest candle.
-                # Next page starts 1ms after that oldest candle's open time.
                 oldest_open_time_ms = int(data[-1][0])
                 current_start = datetime.fromtimestamp((oldest_open_time_ms + 1) / 1000)
+                if end_time and current_start >= end_time:
+                    break
 
         return all_klines
 
