@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from app.api.routes import symbols
+from app.api.routes import klines, symbols
 
 
 logger = logging.getLogger(__name__)
@@ -15,6 +15,7 @@ app = FastAPI(
 
 # Include API routes
 app.include_router(symbols.router)
+app.include_router(klines.router)
 
 
 @app.get("/", tags=["root"])

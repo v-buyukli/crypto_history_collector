@@ -56,25 +56,27 @@ class BinanceClient(BaseExchangeClient):
             and item["status"] == "TRADING"
         ]
 
+    _PAGE_LIMIT = 1000
+
     async def get_klines(
         self,
         symbol: str,
         timeframe: TimeframeEnum,
-        market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
-        start_time: datetime | None = None,
+        start_time: datetime,
         end_time: datetime | None = None,
-        limit: int = 1000,
+        market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
     ) -> list[Kline]:
         """
         Fetch historical candles from Binance.
 
+        Automatically paginates through the full date range.
+
         Args:
             symbol: Trading pair (e.g., "BTCUSDT")
             timeframe: Timeframe (e.g., "1h", "4h", "1d")
-            market_type: Market type ("spot" or "futures")
             start_time: Start of period
             end_time: End of period
-            limit: Maximum number of candles (max 1000)
+            market_type: Market type ("spot" or "futures")
 
         Returns:
             List of candles
@@ -85,28 +87,47 @@ class BinanceClient(BaseExchangeClient):
         if timeframe not in TimeframeEnum:
             raise ValueError(f"Unsupported timeframe: {timeframe}")
 
-        limit = min(limit, 1000)
-
         base_url = BINANCE_BASE_URLS[market_type]
         endpoint = BINANCE_KLINE_ENDPOINTS[market_type]
+        url = f"{base_url}{endpoint}"
 
         params: dict = {
             "symbol": symbol.upper(),
             "interval": timeframe,
-            "limit": limit,
+            "limit": self._PAGE_LIMIT,
         }
-
-        if start_time:
-            params["startTime"] = int(start_time.timestamp() * 1000)
         if end_time:
             params["endTime"] = int(end_time.timestamp() * 1000)
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{base_url}{endpoint}", params=params)
-            response.raise_for_status()
-            data = response.json()
+        current_start = start_time
+        all_klines: list[Kline] = []
 
-        return self._parse_klines(data)
+        async with httpx.AsyncClient() as client:
+            while True:
+                params["startTime"] = int(current_start.timestamp() * 1000)
+
+                data = await self._fetch_klines_page(client, url, params)
+                if not data:
+                    break
+
+                all_klines.extend(self._parse_klines(data))
+
+                if len(data) < self._PAGE_LIMIT:
+                    break
+
+                # Next page starts 1ms after the last candle's open time
+                last_open_time_ms = data[-1][0]
+                current_start = datetime.fromtimestamp((last_open_time_ms + 1) / 1000)
+
+        return all_klines
+
+    async def _fetch_klines_page(
+        self, client: httpx.AsyncClient, url: str, params: dict
+    ) -> list:
+        """Execute a single klines API request."""
+        response = await client.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
 
     def _parse_klines(self, data: list) -> list[Kline]:
         """

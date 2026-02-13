@@ -25,21 +25,21 @@ class BaseExchangeClient(ABC):
         self,
         symbol: str,
         timeframe: TimeframeEnum,
-        market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
-        start_time: datetime | None = None,
+        start_time: datetime,
         end_time: datetime | None = None,
-        limit: int = 1000,
+        market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
     ) -> list[Kline]:
         """
         Fetch historical candles.
 
+        Automatically paginates to retrieve the full date range.
+
         Args:
             symbol: Trading pair (e.g., "BTCUSDT")
             timeframe: Timeframe (e.g., "1h", "4h", "1d")
-            market_type: Market type ("spot" or "futures")
             start_time: Start of period
             end_time: End of period
-            limit: Maximum number of candles
+            market_type: Market type ("spot" or "futures")
 
         Returns:
             List of candles
