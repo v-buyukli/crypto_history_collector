@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from datetime import datetime
 
 import httpx
@@ -25,26 +26,18 @@ BINANCE_EXCHANGE_INFO_ENDPOINTS: dict[MarketTypeEnum, str] = {
 class BinanceClient(BaseExchangeClient):
     """Binance public API client (spot + futures)."""
 
+    RATE_LIMIT: float = 20.0
+
     @staticmethod
     async def get_active_symbols(
         market_type: MarketTypeEnum = MarketTypeEnum.FUTURES,
         quote_asset: QuoteAssetEnum = QuoteAssetEnum.USDT,
     ) -> list[str]:
-        """
-        Get list of active trading symbols.
-
-        Args:
-            market_type: "spot" or "futures"
-            quote_asset: Quote asset filter (e.g., "USDT")
-
-        Returns:
-            List of active symbol names
-        """
         base_url = BINANCE_BASE_URLS[market_type]
         endpoint = BINANCE_EXCHANGE_INFO_ENDPOINTS[market_type]
         url = f"{base_url}{endpoint}"
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(url)
             response.raise_for_status()
             exchange_info = response.json()
@@ -65,28 +58,7 @@ class BinanceClient(BaseExchangeClient):
         start_time: datetime,
         end_time: datetime | None = None,
         market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
-    ) -> list[Kline]:
-        """
-        Fetch historical candles from Binance.
-
-        Automatically paginates through the full date range.
-
-        Args:
-            symbol: Trading pair (e.g., "BTCUSDT")
-            timeframe: Timeframe (e.g., "1h", "4h", "1d")
-            start_time: Start of period
-            end_time: End of period
-            market_type: Market type ("spot" or "futures")
-
-        Returns:
-            List of candles
-        """
-        if market_type not in MarketTypeEnum:
-            raise ValueError(f"Unsupported market type: {market_type}")
-
-        if timeframe not in TimeframeEnum:
-            raise ValueError(f"Unsupported timeframe: {timeframe}")
-
+    ) -> AsyncGenerator[list[Kline], None]:
         base_url = BINANCE_BASE_URLS[market_type]
         endpoint = BINANCE_KLINE_ENDPOINTS[market_type]
         url = f"{base_url}{endpoint}"
@@ -100,9 +72,10 @@ class BinanceClient(BaseExchangeClient):
             params["endTime"] = int(end_time.timestamp() * 1000)
 
         current_start = start_time
-        all_klines: list[Kline] = []
+        own_client = self._external_client is None
+        client = self._external_client or httpx.AsyncClient(timeout=30)
 
-        async with httpx.AsyncClient() as client:
+        try:
             while True:
                 params["startTime"] = int(current_start.timestamp() * 1000)
 
@@ -110,25 +83,23 @@ class BinanceClient(BaseExchangeClient):
                 if not data:
                     break
 
-                all_klines.extend(self._parse_klines(data))
+                yield self._parse_klines(data)
 
                 if len(data) < self._PAGE_LIMIT:
                     break
 
-                # Next page starts 1ms after the last candle's open time
                 last_open_time_ms = data[-1][0]
                 current_start = datetime.fromtimestamp((last_open_time_ms + 1) / 1000)
                 if end_time and current_start >= end_time:
                     break
-
-        return all_klines
+        finally:
+            if own_client:
+                await client.aclose()
 
     async def _fetch_klines_page(
         self, client: httpx.AsyncClient, url: str, params: dict
     ) -> list:
-        """Execute a single klines API request."""
-        response = await client.get(url, params=params)
-        response.raise_for_status()
+        response = await self._request_with_retry(client, url, params)
         return response.json()
 
     def _parse_klines(self, data: list) -> list[Kline]:

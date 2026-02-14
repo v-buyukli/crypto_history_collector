@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from datetime import datetime
 
 import httpx
@@ -23,6 +24,8 @@ BYBIT_TIMEFRAME_MAP: dict[TimeframeEnum, str] = {
 class BybitClient(BaseExchangeClient):
     """Bybit V5 public API client (spot + linear futures)."""
 
+    RATE_LIMIT: float = 10.0
+
     @staticmethod
     async def get_active_symbols(
         market_type: MarketTypeEnum = MarketTypeEnum.FUTURES,
@@ -32,7 +35,7 @@ class BybitClient(BaseExchangeClient):
         url = f"{BYBIT_BASE_URL}/v5/market/instruments-info"
         symbols: list[str] = []
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             cursor: str | None = None
             while True:
                 params: dict = {
@@ -71,53 +74,53 @@ class BybitClient(BaseExchangeClient):
         start_time: datetime,
         end_time: datetime | None = None,
         market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
-    ) -> list[Kline]:
-        if market_type not in BYBIT_CATEGORY_MAP:
-            raise ValueError(f"Unsupported market type: {market_type}")
-        if timeframe not in BYBIT_TIMEFRAME_MAP:
-            raise ValueError(f"Unsupported timeframe: {timeframe}")
-
+    ) -> AsyncGenerator[list[Kline], None]:
         category = BYBIT_CATEGORY_MAP[market_type]
         interval = BYBIT_TIMEFRAME_MAP[timeframe]
         url = f"{BYBIT_BASE_URL}/v5/market/kline"
+
+        start_ms = int(start_time.timestamp() * 1000)
+        current_end_ms = int(end_time.timestamp() * 1000) if end_time else None
 
         params: dict = {
             "category": category,
             "symbol": symbol.upper(),
             "interval": interval,
             "limit": self._PAGE_LIMIT,
+            "start": start_ms,
         }
-        if end_time:
-            params["end"] = int(end_time.timestamp() * 1000)
 
-        current_start = start_time
-        all_klines: list[Kline] = []
+        own_client = self._external_client is None
+        client = self._external_client or httpx.AsyncClient(timeout=30)
 
-        async with httpx.AsyncClient() as client:
+        try:
             while True:
-                params["start"] = int(current_start.timestamp() * 1000)
+                if current_end_ms is not None:
+                    params["end"] = current_end_ms
 
                 data = await self._fetch_klines_page(client, url, params)
                 if not data:
                     break
 
-                all_klines.extend(self._parse_klines(data))
+                yield self._parse_klines(data)
 
                 if len(data) < self._PAGE_LIMIT:
                     break
 
+                # Bybit returns newest first: data[0]=newest, data[-1]=oldest.
+                # Paginate backwards by moving end before the oldest candle.
                 oldest_open_time_ms = int(data[-1][0])
-                current_start = datetime.fromtimestamp((oldest_open_time_ms + 1) / 1000)
-                if end_time and current_start >= end_time:
+                current_end_ms = oldest_open_time_ms - 1
+                if current_end_ms <= start_ms:
                     break
-
-        return all_klines
+        finally:
+            if own_client:
+                await client.aclose()
 
     async def _fetch_klines_page(
         self, client: httpx.AsyncClient, url: str, params: dict
     ) -> list:
-        response = await client.get(url, params=params)
-        response.raise_for_status()
+        response = await self._request_with_retry(client, url, params)
         body = response.json()
 
         if body.get("retCode") != 0:

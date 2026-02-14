@@ -49,7 +49,6 @@ class SymbolsRepository:
         added = 0
         activated = 0
         deactivated = 0
-
         current_symbols_set = set(current_symbols)
 
         # add new or reactivate

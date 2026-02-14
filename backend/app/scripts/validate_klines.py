@@ -15,7 +15,7 @@ from app.enums import ExchangeEnum, MarketTypeEnum, TimeframeEnum
 
 
 # ── Configuration ──────────────────────────────────────────────
-EXCHANGE = ExchangeEnum.BINANCE
+EXCHANGE = ExchangeEnum.BYBIT
 MARKET_TYPE = MarketTypeEnum.FUTURES
 TIMEFRAME = TimeframeEnum.h1
 # ───────────────────────────────────────────────────────────────
