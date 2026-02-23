@@ -8,7 +8,7 @@ done
 echo "PostgreSQL is ready!"
 
 echo "Running database migrations..."
-poetry run alembic upgrade head
+poetry run alembic -c app/alembic.ini upgrade head
 echo "Migrations completed!"
 
 exec "$@"

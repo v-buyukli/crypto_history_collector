@@ -26,14 +26,10 @@ COPY pyproject.toml ./
 # 7. Install dependencies
 RUN poetry install --only main --no-root
 
-# 8. Copy source code
+# 8. Copy source code (alembic.ini and alembic/ are inside app/)
 COPY app/ ./app/
 
-# 9. Copy alembic for migrations
-COPY alembic.ini ./
-COPY alembic/ ./alembic/
-
-# 10. Copy and setup entrypoint
+# 9. Copy and setup entrypoint
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
