@@ -9,16 +9,17 @@ from app.services.mappers import EXCHANGE_CLIENTS
 class SymbolsService:
 
     @staticmethod
-    async def get_active(
+    async def get_exchange_symbols(
         session: AsyncSession,
         symbols_request: SymbolsRequest,
     ) -> SymbolsResponse:
         try:
-            symbols = await SymbolsRepository.get_active_symbols(
+            symbols = await SymbolsRepository.get_exchange_symbols(
                 session=session,
                 exchange=symbols_request.exchange,
                 market_type=symbols_request.market_type,
                 quote_asset=symbols_request.quote_asset,
+                is_active=symbols_request.is_active,
             )
         except Exception as e:
             raise HTTPException(
@@ -30,6 +31,7 @@ class SymbolsService:
             exchange=symbols_request.exchange,
             market_type=symbols_request.market_type,
             quote_asset=symbols_request.quote_asset,
+            is_active=symbols_request.is_active,
             symbols=symbols,
             count=len(symbols),
         )
@@ -42,7 +44,7 @@ class SymbolsService:
         client_class = EXCHANGE_CLIENTS[symbols_request.exchange]
 
         try:
-            current_symbols = await client_class.get_active_symbols(
+            current_symbols = await client_class.get_exchange_symbols(
                 market_type=symbols_request.market_type,
                 quote_asset=symbols_request.quote_asset,
             )

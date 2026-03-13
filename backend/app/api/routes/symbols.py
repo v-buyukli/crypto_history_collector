@@ -16,8 +16,8 @@ async def get_symbols(
     symbols_request: Annotated[SymbolsRequest, Query()],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> SymbolsResponse:
-    """Get list of active trading symbols from database."""
-    return await SymbolsService.get_active(
+    """Get list of exchange symbols from database."""
+    return await SymbolsService.get_exchange_symbols(
         session=session,
         symbols_request=symbols_request,
     )

@@ -95,23 +95,25 @@ class SymbolsRepository:
         }
 
     @staticmethod
-    async def get_active_symbols(
+    async def get_exchange_symbols(
         session: AsyncSession,
         exchange: ExchangeEnum,
         market_type: MarketTypeEnum = MarketTypeEnum.FUTURES,
         quote_asset: QuoteAssetEnum = QuoteAssetEnum.USDT,
+        is_active: bool | None = None,
     ) -> list[str]:
         """
-        Get list of active trading symbols from database.
+        Get list of exchange symbols from database.
 
         Args:
             session: Async database session
             exchange: Exchange enum
             market_type: Market type enum
             quote_asset: Quote asset enum
+            is_active: Filter by active (True), inactive (False), or all (None)
 
         Returns:
-            List of active symbol names
+            List of symbol names
         """
         stmt = (
             select(Symbol.name)
@@ -121,10 +123,11 @@ class SymbolsRepository:
             .where(
                 Exchange.name == exchange.value,
                 MarketType.name == market_type.value,
-                ExchangeSymbol.is_active == True,  # noqa: E712
                 Symbol.name.endswith(quote_asset.value.upper()),
             )
         )
+        if is_active is not None:
+            stmt = stmt.where(ExchangeSymbol.is_active == is_active)  # noqa: E712
 
         result = await session.execute(stmt)
         return list(result.scalars().all())
