@@ -44,7 +44,7 @@ class SymbolsService:
         client_class = EXCHANGE_CLIENTS[symbols_request.exchange]
 
         try:
-            current_symbols = await client_class.get_exchange_symbols(
+            current_symbols = await client_class.get_active_symbols(
                 market_type=symbols_request.market_type,
                 quote_asset=symbols_request.quote_asset,
             )
