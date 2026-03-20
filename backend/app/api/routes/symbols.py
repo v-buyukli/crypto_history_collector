@@ -8,7 +8,7 @@ from app.schemas.symbols import SymbolsRequest, SymbolsResponse, UpdateSymbolsRe
 from app.services.symbols import SymbolsService
 
 
-router = APIRouter(prefix="/api/symbols", tags=["symbols"])
+router = APIRouter(prefix="/symbols", tags=["symbols"])
 
 
 @router.get("/", response_model=SymbolsResponse)
@@ -23,12 +23,12 @@ async def get_symbols(
     )
 
 
-@router.post("/update", response_model=UpdateSymbolsResponse)
-async def update_symbols(
+@router.post("/sync", response_model=UpdateSymbolsResponse)
+async def sync_symbols(
     symbols_request: SymbolsRequest,
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> UpdateSymbolsResponse:
-    """Fetch symbols from exchange API and update database."""
+    """Sync symbols from the exchange API into the database (upsert)."""
     return await SymbolsService.update(
         session=session,
         symbols_request=symbols_request,

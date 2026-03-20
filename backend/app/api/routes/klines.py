@@ -8,15 +8,15 @@ from app.schemas.klines import CollectKlinesRequest, CollectKlinesResponse
 from app.services.klines import KlinesService
 
 
-router = APIRouter(prefix="/api/klines", tags=["klines"])
+router = APIRouter(prefix="/klines", tags=["klines"])
 
 
-@router.post("/collect", response_model=CollectKlinesResponse)
-async def collect_klines(
+@router.post("/import", response_model=CollectKlinesResponse)
+async def import_klines(
     collect_klines_request: CollectKlinesRequest,
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> CollectKlinesResponse:
-    """Fetch candles from exchange API and save to database."""
+    """Import historical klines (candles) from the exchange API into the database."""
     return await KlinesService.collect(
         session=session,
         collect_klines_request=collect_klines_request,

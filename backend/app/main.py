@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 
 from app.api.routes import klines, symbols
 
@@ -14,8 +14,10 @@ app = FastAPI(
 )
 
 # Include API routes
-app.include_router(symbols.router)
-app.include_router(klines.router)
+api_router = APIRouter(prefix="/api/v1")
+api_router.include_router(symbols.router)
+api_router.include_router(klines.router)
+app.include_router(api_router)
 
 
 @app.get("/", tags=["root"])
@@ -26,5 +28,4 @@ async def root():
         "version": "0.1.0",
         "docs": "/docs",
         "redoc": "/redoc",
-        "status": "/api/status",
     }
