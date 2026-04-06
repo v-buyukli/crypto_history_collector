@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install poetry
 
 # 6. Copy dependency files
-COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock ./
 
 # 7. Install dependencies
 RUN poetry install --only main --no-root
