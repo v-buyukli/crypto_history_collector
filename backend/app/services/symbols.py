@@ -20,6 +20,8 @@ class SymbolsService:
                 market_type=symbols_request.market_type,
                 quote_asset=symbols_request.quote_asset,
                 is_active=symbols_request.is_active,
+                limit=symbols_request.limit,
+                offset=symbols_request.offset,
             )
         except Exception as e:
             raise HTTPException(
@@ -34,6 +36,8 @@ class SymbolsService:
             is_active=symbols_request.is_active,
             symbols=symbols,
             count=len(symbols),
+            limit=symbols_request.limit,
+            offset=symbols_request.offset,
         )
 
     @staticmethod

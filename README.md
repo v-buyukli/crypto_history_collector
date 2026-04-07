@@ -1,27 +1,39 @@
 # Crypto History Collector
 
-FastAPI application for collecting historical cryptocurrency exchange data.
+FastAPI application for collecting historical cryptocurrency OHLCV data (klines/candles) from exchanges into a PostgreSQL database.
+
+**Supported exchanges:** Binance, Bybit
+**Supported market types:** spot, futures
+**Supported timeframes:** 1h, 4h, 1d
 
 ## Running with Docker
 
-The easiest way to run the application is with Docker. Make sure you have Docker and Docker Compose installed.
-
-1.  **Clone the repository.**
-2.  **Build and run the services:**
+1. **Clone the repository.**
+2. **Create `.env` from the example:**
+    ```bash
+    cp .env.example .env
+    ```
+    Edit `.env` if needed.
+3. **Build and run the services:**
     ```bash
     docker compose up --build
     ```
 
-This will start both the backend and frontend services.
+This will start the database, backend, and frontend services.
 
-## Links
+## Access
 
-Once the application is running, you can access the services at the following URLs:
+| Service | URL |
+|---------|-----|
+| Backend API info | http://localhost:8000/ |
+| Swagger UI | http://localhost:8000/docs |
+| ReDoc | http://localhost:8000/redoc |
+| Streamlit frontend | http://localhost:8501 |
 
-### Backend API
-- **API Info**: http://localhost:8000/
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+## API Endpoints
 
-### Frontend UI
-- **Streamlit App**: http://localhost:8501
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/symbols` | List symbols from database |
+| POST | `/api/v1/symbols/sync` | Sync symbols from exchange API |
+| POST | `/api/v1/klines/import` | Import historical klines from exchange API |

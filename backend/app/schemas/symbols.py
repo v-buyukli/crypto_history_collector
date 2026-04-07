@@ -19,6 +19,10 @@ class SymbolsRequest(BaseModel):
         default=None,
         description="Filter by active/inactive symbols. None - all symbols",
     )
+    limit: int = Field(
+        default=500, ge=1, le=5000, description="Max number of symbols to return"
+    )
+    offset: int = Field(default=0, ge=0, description="Number of symbols to skip")
 
 
 class SymbolsResponse(BaseModel):
@@ -32,6 +36,8 @@ class SymbolsResponse(BaseModel):
     )
     symbols: list[str] = Field(..., description="List of symbol names")
     count: int = Field(..., description="Number of symbols returned")
+    limit: int = Field(..., description="Applied limit")
+    offset: int = Field(..., description="Applied offset")
 
 
 class UpdateSymbolsResponse(BaseModel):

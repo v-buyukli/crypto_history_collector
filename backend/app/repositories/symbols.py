@@ -101,6 +101,8 @@ class SymbolsRepository:
         market_type: MarketTypeEnum = MarketTypeEnum.FUTURES,
         quote_asset: QuoteAssetEnum = QuoteAssetEnum.USDT,
         is_active: bool | None = None,
+        limit: int = 500,
+        offset: int = 0,
     ) -> list[str]:
         """
         Get list of exchange symbols from database.
@@ -129,5 +131,6 @@ class SymbolsRepository:
         if is_active is not None:
             stmt = stmt.where(ExchangeSymbol.is_active == is_active)  # noqa: E712
 
+        stmt = stmt.offset(offset).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())

@@ -11,7 +11,7 @@ from app.services.symbols import SymbolsService
 router = APIRouter(prefix="/symbols", tags=["symbols"])
 
 
-@router.get("/", response_model=SymbolsResponse)
+@router.get("", response_model=SymbolsResponse)
 async def get_symbols(
     symbols_request: Annotated[SymbolsRequest, Query()],
     session: Annotated[AsyncSession, Depends(get_async_session)],
