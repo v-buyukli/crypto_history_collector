@@ -16,7 +16,7 @@ from app.enums import ExchangeEnum, MarketTypeEnum, TimeframeEnum
 
 
 # ── Configuration ──────────────────────────────────────────────
-EXCHANGE = ExchangeEnum.BYBIT
+EXCHANGE = ExchangeEnum.BINANCE
 MARKET_TYPE = MarketTypeEnum.FUTURES
 TIMEFRAME = TimeframeEnum.h1
 OUTPUT_DIR = Path("exported_klines")

@@ -4,7 +4,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_async_session
-from app.schemas.symbols import SymbolsRequest, SymbolsResponse, UpdateSymbolsResponse
+from app.schemas.symbols import (
+    SymbolsRequest,
+    SymbolsResponse,
+    SyncSymbolsRequest,
+    UpdateSymbolsResponse,
+)
 from app.services.symbols import SymbolsService
 
 
@@ -25,7 +30,7 @@ async def get_symbols(
 
 @router.post("/sync", response_model=UpdateSymbolsResponse)
 async def sync_symbols(
-    symbols_request: SymbolsRequest,
+    symbols_request: SyncSymbolsRequest,
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> UpdateSymbolsResponse:
     """Sync symbols from the exchange API into the database (upsert)."""

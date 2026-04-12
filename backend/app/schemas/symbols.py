@@ -40,6 +40,20 @@ class SymbolsResponse(BaseModel):
     offset: int = Field(..., description="Applied offset")
 
 
+class SyncSymbolsRequest(BaseModel):
+    """Request parameters for syncing symbols from exchange."""
+
+    exchange: ExchangeEnum = Field(
+        default=ExchangeEnum.BINANCE, description="Exchange name"
+    )
+    market_type: MarketTypeEnum = Field(
+        default=MarketTypeEnum.FUTURES, description="Market type"
+    )
+    quote_asset: QuoteAssetEnum = Field(
+        default=QuoteAssetEnum.USDT, description="Quote asset filter"
+    )
+
+
 class UpdateSymbolsResponse(BaseModel):
     """Response with update statistics."""
 

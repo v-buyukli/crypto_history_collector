@@ -13,6 +13,7 @@ import httpx
 from app.db.session import AsyncSessionLocal
 from app.enums import ExchangeEnum, MarketTypeEnum, TimeframeEnum
 from app.repositories.klines import KlinesRepository
+from app.repositories.symbols import SymbolsRepository
 from app.services.mappers import EXCHANGE_CLIENTS
 
 
@@ -25,11 +26,13 @@ logger = logging.getLogger(__name__)
 
 
 # ── Configuration ──────────────────────────────────────────────
-SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+SYMBOLS_OVERRIDE: list[str] | None = (
+    None  # None = auto from DB by EXCHANGE + MARKET_TYPE
+)
 TIMEFRAME = TimeframeEnum.h1
-START_TIME = datetime(2020, 1, 1)
-END_TIME = datetime(2026, 2, 10)  # None = up to now
-EXCHANGE = ExchangeEnum.BYBIT
+START_TIME = datetime(2026, 1, 1)
+END_TIME = datetime(2026, 4, 12, 12)
+EXCHANGE = ExchangeEnum.BINANCE
 MARKET_TYPE = MarketTypeEnum.FUTURES
 MAX_CONCURRENT = 5  # parallel symbols
 # ───────────────────────────────────────────────────────────────
@@ -97,12 +100,33 @@ async def backfill_symbol(
 async def main() -> None:
     semaphore = asyncio.Semaphore(MAX_CONCURRENT)
 
+    if SYMBOLS_OVERRIDE:
+        symbols = SYMBOLS_OVERRIDE
+        logger.info("Using %d symbols from SYMBOLS_OVERRIDE", len(symbols))
+    else:
+        async with AsyncSessionLocal() as session:
+            symbols = await SymbolsRepository.get_exchange_symbols(
+                session,
+                exchange=EXCHANGE,
+                market_type=MARKET_TYPE,
+            )
+        logger.info(
+            "Loaded %d active symbols for %s/%s from DB",
+            len(symbols),
+            EXCHANGE.value,
+            MARKET_TYPE.value,
+        )
+
+    if not symbols:
+        logger.warning("No symbols to process, exiting.")
+        return
+
     async with httpx.AsyncClient(timeout=30) as http_client:
         client = EXCHANGE_CLIENTS[EXCHANGE](http_client=http_client)
 
         tasks = [
-            backfill_symbol(client, symbol, idx, len(SYMBOLS), semaphore)
-            for idx, symbol in enumerate(SYMBOLS, start=1)
+            backfill_symbol(client, symbol, idx, len(symbols), semaphore)
+            for idx, symbol in enumerate(symbols, start=1)
         ]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)

@@ -2,7 +2,12 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.symbols import SymbolsRepository
-from app.schemas.symbols import SymbolsRequest, SymbolsResponse, UpdateSymbolsResponse
+from app.schemas.symbols import (
+    SymbolsRequest,
+    SymbolsResponse,
+    SyncSymbolsRequest,
+    UpdateSymbolsResponse,
+)
 from app.services.mappers import EXCHANGE_CLIENTS
 
 
@@ -43,7 +48,7 @@ class SymbolsService:
     @staticmethod
     async def update(
         session: AsyncSession,
-        symbols_request: SymbolsRequest,
+        symbols_request: SyncSymbolsRequest,
     ) -> UpdateSymbolsResponse:
         client_class = EXCHANGE_CLIENTS[symbols_request.exchange]
 
