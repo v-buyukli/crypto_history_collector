@@ -27,3 +27,12 @@ class TimeframeEnum(StrEnum):
     h1 = "1h"
     h4 = "4h"
     d1 = "1d"
+
+
+class ImportTaskStatusEnum(StrEnum):
+    """Import task statuses."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    DONE = "done"
+    FAILED = "failed"

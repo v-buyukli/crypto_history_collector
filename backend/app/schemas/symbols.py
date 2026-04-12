@@ -1,28 +1,20 @@
 from pydantic import BaseModel, Field
 
 from app.enums import ExchangeEnum, MarketTypeEnum, QuoteAssetEnum
+from app.schemas.common import ExchangeMarketQuoteBase, PaginationRequest
 
 
-class SymbolsRequest(BaseModel):
+class SyncSymbolsRequest(ExchangeMarketQuoteBase):
+    """Request parameters for syncing symbols from exchange."""
+
+
+class SymbolsRequest(ExchangeMarketQuoteBase, PaginationRequest):
     """Request parameters for getting symbols."""
 
-    exchange: ExchangeEnum = Field(
-        default=ExchangeEnum.BINANCE, description="Exchange name"
-    )
-    market_type: MarketTypeEnum = Field(
-        default=MarketTypeEnum.FUTURES, description="Market type"
-    )
-    quote_asset: QuoteAssetEnum = Field(
-        default=QuoteAssetEnum.USDT, description="Quote asset filter"
-    )
     is_active: bool | None = Field(
         default=None,
         description="Filter by active/inactive symbols. None - all symbols",
     )
-    limit: int = Field(
-        default=500, ge=1, le=5000, description="Max number of symbols to return"
-    )
-    offset: int = Field(default=0, ge=0, description="Number of symbols to skip")
 
 
 class SymbolsResponse(BaseModel):
@@ -40,26 +32,9 @@ class SymbolsResponse(BaseModel):
     offset: int = Field(..., description="Applied offset")
 
 
-class SyncSymbolsRequest(BaseModel):
-    """Request parameters for syncing symbols from exchange."""
-
-    exchange: ExchangeEnum = Field(
-        default=ExchangeEnum.BINANCE, description="Exchange name"
-    )
-    market_type: MarketTypeEnum = Field(
-        default=MarketTypeEnum.FUTURES, description="Market type"
-    )
-    quote_asset: QuoteAssetEnum = Field(
-        default=QuoteAssetEnum.USDT, description="Quote asset filter"
-    )
-
-
-class UpdateSymbolsResponse(BaseModel):
+class UpdateSymbolsResponse(ExchangeMarketQuoteBase):
     """Response with update statistics."""
 
-    exchange: ExchangeEnum
-    market_type: MarketTypeEnum
-    quote_asset: QuoteAssetEnum
     total_active: int
     added: int
     activated: int

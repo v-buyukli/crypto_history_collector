@@ -1,4 +1,6 @@
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,6 +36,26 @@ class KlinesRepository:
         )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_date_range(
+        session: AsyncSession,
+        exchange_symbol_id: int,
+        timeframe: TimeframeEnum,
+    ) -> tuple[datetime, datetime] | None:
+        """Return (first, last) candle timestamps for the given symbol+timeframe, or None if no data."""
+        stmt = select(
+            func.min(Candle.timestamp),
+            func.max(Candle.timestamp),
+        ).where(
+            Candle.exchange_symbol_id == exchange_symbol_id,
+            Candle.timeframe == timeframe.value,
+        )
+        result = await session.execute(stmt)
+        first, last = result.one()
+        if first is None:
+            return None
+        return first, last
 
     @staticmethod
     async def save_klines(

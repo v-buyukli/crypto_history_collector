@@ -109,6 +109,7 @@ async def main() -> None:
                 session,
                 exchange=EXCHANGE,
                 market_type=MARKET_TYPE,
+                limit=2000,
             )
         logger.info(
             "Loaded %d active symbols for %s/%s from DB",

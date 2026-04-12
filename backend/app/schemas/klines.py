@@ -1,13 +1,12 @@
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import field_validator, model_validator
 
-from app.enums import ExchangeEnum, MarketTypeEnum, TimeframeEnum
+from app.enums import TimeframeEnum
+from app.schemas.common import ExchangeMarketBase
 
 
-class CollectKlinesRequest(BaseModel):
-    exchange: ExchangeEnum = ExchangeEnum.BINANCE
-    market_type: MarketTypeEnum = MarketTypeEnum.FUTURES
+class CollectKlinesRequest(ExchangeMarketBase):
     symbol: str
     timeframe: TimeframeEnum = TimeframeEnum.h1
     start_time: datetime
@@ -25,12 +24,3 @@ class CollectKlinesRequest(BaseModel):
         if self.end_time is not None and self.start_time >= self.end_time:
             raise ValueError("start_time must be before end_time")
         return self
-
-
-class CollectKlinesResponse(BaseModel):
-    exchange: ExchangeEnum
-    market_type: MarketTypeEnum
-    symbol: str
-    timeframe: TimeframeEnum
-    fetched: int
-    inserted: int

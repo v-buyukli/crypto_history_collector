@@ -113,6 +113,8 @@ class SymbolsRepository:
             market_type: Market type enum
             quote_asset: Quote asset enum
             is_active: Filter by active (True), inactive (False), or all (None)
+            limit: Max number of symbols to return
+            offset: Number of symbols to skip
 
         Returns:
             List of symbol names
