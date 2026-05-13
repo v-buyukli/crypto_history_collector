@@ -36,4 +36,4 @@ repos:
           - flake8-bugbear
         args:
           - "--max-line-length=100"
-          - "--extend-ignore=D100,D101,D102,D103,D104,D105,D107,D205,D400,E203,E501,F401,W503"
+          - "--extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107,D202,D205,D400,E203,E501,F401,W503"

@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 from datetime import datetime
+from enum import StrEnum
 
 import httpx
 
@@ -7,7 +8,17 @@ from app.enums import MarketTypeEnum, QuoteAssetEnum, TimeframeEnum
 from app.exchanges.base import BaseExchangeClient, Kline
 
 
-BYBIT_BASE_URL = "https://api.bybit.com"
+class BybitAPI:
+    BASE_URL = "https://api.bybit.com"
+
+    class Market(StrEnum):
+        INSTRUMENTS_INFO = "/v5/market/instruments-info"
+        KLINES = "/v5/market/kline"
+
+
+def bybit_url(endpoint: str) -> str:
+    return f"{BybitAPI.BASE_URL}{endpoint}"
+
 
 BYBIT_CATEGORY_MAP: dict[MarketTypeEnum, str] = {
     MarketTypeEnum.SPOT: "spot",
@@ -25,6 +36,7 @@ class BybitClient(BaseExchangeClient):
     """Bybit V5 public API client (spot + linear futures)."""
 
     RATE_LIMIT: float = 10.0
+    _PAGE_LIMIT = 1000
 
     @staticmethod
     async def get_active_symbols(
@@ -32,28 +44,31 @@ class BybitClient(BaseExchangeClient):
         quote_asset: QuoteAssetEnum = QuoteAssetEnum.USDT,
     ) -> list[str]:
         category = BYBIT_CATEGORY_MAP[market_type]
-        url = f"{BYBIT_BASE_URL}/v5/market/instruments-info"
+        url = bybit_url(BybitAPI.Market.INSTRUMENTS_INFO)
         symbols: list[str] = []
 
         async with httpx.AsyncClient(timeout=30) as client:
             cursor: str | None = None
+
             while True:
                 params: dict = {
                     "category": category,
                     "limit": "1000",
                     "status": "Trading",
                 }
+
                 if cursor:
                     params["cursor"] = cursor
 
                 response = await client.get(url, params=params)
                 response.raise_for_status()
-                body = response.json()
 
+                body = response.json()
                 if body.get("retCode") != 0:
                     raise RuntimeError(f"Bybit API error: {body.get('retMsg')}")
 
                 result = body["result"]
+
                 for item in result["list"]:
                     sym = item["symbol"]
                     if sym.endswith(quote_asset.value.upper()):
@@ -65,8 +80,6 @@ class BybitClient(BaseExchangeClient):
 
         return symbols
 
-    _PAGE_LIMIT = 1000
-
     async def get_klines(
         self,
         symbol: str,
@@ -77,7 +90,8 @@ class BybitClient(BaseExchangeClient):
     ) -> AsyncGenerator[list[Kline], None]:
         category = BYBIT_CATEGORY_MAP[market_type]
         interval = BYBIT_TIMEFRAME_MAP[timeframe]
-        url = f"{BYBIT_BASE_URL}/v5/market/kline"
+
+        url = bybit_url(BybitAPI.Market.KLINES)
 
         start_ms = int(start_time.timestamp() * 1000)
         current_end_ms = int(end_time.timestamp() * 1000) if end_time else None
@@ -140,7 +154,9 @@ class BybitClient(BaseExchangeClient):
 
         Fields: [startTime, openPrice, highPrice, lowPrice, closePrice, volume, ...]
         """
+
         klines = []
+
         for item in reversed(data):
             kline = Kline(
                 timestamp=datetime.fromtimestamp(int(item[0]) / 1000),
@@ -151,4 +167,5 @@ class BybitClient(BaseExchangeClient):
                 volume=float(item[5]),
             )
             klines.append(kline)
+
         return klines

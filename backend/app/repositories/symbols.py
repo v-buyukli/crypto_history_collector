@@ -119,6 +119,7 @@ class SymbolsRepository:
         Returns:
             List of symbol names
         """
+
         stmt = (
             select(Symbol.name)
             .join(ExchangeSymbol, ExchangeSymbol.symbol_id == Symbol.id)
@@ -130,9 +131,11 @@ class SymbolsRepository:
                 Symbol.name.endswith(quote_asset.value.upper()),
             )
         )
+
         if is_active is not None:
             stmt = stmt.where(ExchangeSymbol.is_active == is_active)  # noqa: E712
 
         stmt = stmt.offset(offset).limit(limit)
         result = await session.execute(stmt)
+
         return list(result.scalars().all())

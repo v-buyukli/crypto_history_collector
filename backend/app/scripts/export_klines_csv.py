@@ -100,6 +100,7 @@ async def main() -> None:
 
     print("─" * 40)
     print(f"Done. Exported {total_candles} candles for {total_symbols} symbols.")
+
     if failed_symbols:
         print(f"\nFailed ({len(failed_symbols)}):")
         for s in failed_symbols:

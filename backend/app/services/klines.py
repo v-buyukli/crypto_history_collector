@@ -20,6 +20,7 @@ class KlinesService:
         request: CollectKlinesRequest,
     ) -> ImportTaskResponse:
         """Validate the symbol and create a pending task. Returns task dict."""
+
         exchange_symbol_id = await KlinesRepository.resolve_exchange_symbol_id(
             session=session,
             exchange=request.exchange,
@@ -55,6 +56,7 @@ class KlinesService:
     @staticmethod
     async def _run_import(task_id: str, request: CollectKlinesRequest) -> None:
         """Background function: fetch klines and save to DB, updating task status."""
+
         task_store.update_task(
             task_id,
             status=ImportTaskStatusEnum.RUNNING,

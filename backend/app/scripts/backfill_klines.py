@@ -30,11 +30,11 @@ SYMBOLS_OVERRIDE: list[str] | None = (
     None  # None = auto from DB by EXCHANGE + MARKET_TYPE
 )
 TIMEFRAME = TimeframeEnum.h1
-START_TIME = datetime(2026, 4, 18)
-END_TIME = datetime(2026, 4, 25, 12)
+START_TIME = datetime(2026, 5, 7)
+END_TIME = datetime(2026, 5, 13, 10)
 EXCHANGE = ExchangeEnum.BINANCE
 MARKET_TYPE = MarketTypeEnum.FUTURES
-MAX_CONCURRENT = 5  # parallel symbols
+MAX_CONCURRENT = 3  # parallel symbols
 # ───────────────────────────────────────────────────────────────
 
 

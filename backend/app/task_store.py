@@ -33,6 +33,7 @@ def create_task(request: CollectKlinesRequest) -> ImportTaskResponse:
         finished_at=None,
     )
     _tasks[task.id] = task
+
     return task
 
 
@@ -49,8 +50,11 @@ TASK_TTL_HOURS = 24
 
 def cleanup_expired(ttl_hours: int = TASK_TTL_HOURS) -> int:
     """Remove tasks older than ttl_hours. Returns number of removed tasks."""
+
     cutoff = datetime.now(UTC) - timedelta(hours=ttl_hours)
     expired = [task_id for task_id, task in _tasks.items() if task.created_at < cutoff]
+
     for task_id in expired:
         del _tasks[task_id]
+
     return len(expired)

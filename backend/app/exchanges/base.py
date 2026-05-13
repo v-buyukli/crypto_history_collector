@@ -67,6 +67,7 @@ class BaseExchangeClient(ABC):
         """Execute GET request with rate limiting and exponential backoff retry."""
         for attempt in range(self.MAX_RETRIES):
             await self._rate_limiter.acquire()
+
             try:
                 response = await client.get(url, params=params)
                 if response.status_code not in self.RETRY_STATUSES:
@@ -122,6 +123,7 @@ class BaseExchangeClient(ABC):
         Fetch historical candles, yielding batches as they arrive.
 
         Each yield is a list of Kline objects from one API page.
+
         """
         yield  # pragma: no cover
         raise NotImplementedError  # pragma: no cover
@@ -133,4 +135,5 @@ class BaseExchangeClient(ABC):
         quote_asset: QuoteAssetEnum = QuoteAssetEnum.USDT,
     ) -> list[str]:
         """Get list of active trading symbols."""
+
         pass

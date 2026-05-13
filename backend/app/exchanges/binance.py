@@ -23,23 +23,33 @@ BINANCE_EXCHANGE_INFO_ENDPOINTS: dict[MarketTypeEnum, str] = {
 }
 
 
+def build_binance_url(
+    market_type: MarketTypeEnum,
+    endpoint_map: dict[MarketTypeEnum, str],
+) -> str:
+    return f"{BINANCE_BASE_URLS[market_type]}" f"{endpoint_map[market_type]}"
+
+
 class BinanceClient(BaseExchangeClient):
     """Binance public API client (spot + futures)."""
 
     RATE_LIMIT: float = 20.0
+    _PAGE_LIMIT = 1000
 
     @staticmethod
     async def get_active_symbols(
         market_type: MarketTypeEnum = MarketTypeEnum.FUTURES,
         quote_asset: QuoteAssetEnum = QuoteAssetEnum.USDT,
     ) -> list[str]:
-        base_url = BINANCE_BASE_URLS[market_type]
-        endpoint = BINANCE_EXCHANGE_INFO_ENDPOINTS[market_type]
-        url = f"{base_url}{endpoint}"
+        url = build_binance_url(
+            market_type=market_type,
+            endpoint_map=BINANCE_EXCHANGE_INFO_ENDPOINTS,
+        )
 
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(url)
             response.raise_for_status()
+
             exchange_info = response.json()
 
         return [
@@ -49,8 +59,6 @@ class BinanceClient(BaseExchangeClient):
             and item["status"] == "TRADING"
         ]
 
-    _PAGE_LIMIT = 1000
-
     async def get_klines(
         self,
         symbol: str,
@@ -59,9 +67,10 @@ class BinanceClient(BaseExchangeClient):
         end_time: datetime | None = None,
         market_type: MarketTypeEnum = MarketTypeEnum.SPOT,
     ) -> AsyncGenerator[list[Kline], None]:
-        base_url = BINANCE_BASE_URLS[market_type]
-        endpoint = BINANCE_KLINE_ENDPOINTS[market_type]
-        url = f"{base_url}{endpoint}"
+        url = build_binance_url(
+            market_type=market_type,
+            endpoint_map=BINANCE_KLINE_ENDPOINTS,
+        )
 
         params: dict = {
             "symbol": symbol.upper(),
@@ -120,7 +129,9 @@ class BinanceClient(BaseExchangeClient):
             ...
         ]
         """
+
         klines = []
+
         for item in data:
             kline = Kline(
                 timestamp=datetime.fromtimestamp(item[0] / 1000),
@@ -131,4 +142,5 @@ class BinanceClient(BaseExchangeClient):
                 volume=float(item[5]),
             )
             klines.append(kline)
+
         return klines

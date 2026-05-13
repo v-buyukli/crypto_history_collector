@@ -1,12 +1,14 @@
 # Crypto History Collector
 
-FastAPI application for collecting historical cryptocurrency OHLCV data (klines/candles) from exchanges into a PostgreSQL database.
+FastAPI application for collecting historical cryptocurrency OHLCV data (klines/candles) from exchanges.
 
 **Supported exchanges:** Binance, Bybit
+
 **Supported market types:** spot, futures
+
 **Supported timeframes:** 1h, 4h, 1d
 
-## Running with Docker
+## Local running with Docker
 
 1. **Clone the repository.**
 2. **Create `.env` from the example:**
@@ -25,7 +27,7 @@ This will start the database, backend, and frontend services.
 
 | Service | URL |
 |---------|-----|
-| Backend API info | http://localhost:8000/ |
+| Backend API info | http://localhost:8000 |
 | Swagger UI | http://localhost:8000/docs |
 | ReDoc | http://localhost:8000/redoc |
 | Streamlit frontend | http://localhost:8501 |

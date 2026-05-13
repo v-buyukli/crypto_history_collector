@@ -22,6 +22,7 @@ async def get_symbols(
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> SymbolsResponse:
     """Get list of exchange symbols from database."""
+
     return await SymbolsService.get_exchange_symbols(
         session=session,
         symbols_request=symbols_request,
@@ -34,6 +35,7 @@ async def sync_symbols(
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> UpdateSymbolsResponse:
     """Sync symbols from the exchange API into the database (upsert)."""
+
     return await SymbolsService.update(
         session=session,
         symbols_request=symbols_request,

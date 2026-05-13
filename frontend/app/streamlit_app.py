@@ -20,13 +20,16 @@ st.set_page_config(
 # Load custom CSS from external file
 def svg_to_data_uri(filename: str) -> str:
     """Read SVG file from static/images/ and return as base64 data URI."""
+
     svg_path = STATIC_DIR / "images" / filename
     b64 = base64.b64encode(svg_path.read_bytes()).decode()
+
     return f"data:image/svg+xml;base64,{b64}"
 
 
 def load_css():
     """Load custom CSS from static/css/custom.css file."""
+
     css_file = STATIC_DIR / "css" / "custom.css"
     if css_file.exists():
         css_content = css_file.read_text(encoding="utf-8")
@@ -39,6 +42,7 @@ load_css()
 # Helper functions for rendering cards
 def render_feature_card(icon: str, title: str, description: str) -> None:
     """Render a feature card with icon, title and description."""
+
     st.markdown(
         f"""
         <div class="feature-card">
@@ -53,6 +57,7 @@ def render_feature_card(icon: str, title: str, description: str) -> None:
 
 def render_exchange_card(name: str, logo_url: str) -> None:
     """Render an exchange card with logo and name."""
+
     st.markdown(
         f"""
         <div class="exchange-card">

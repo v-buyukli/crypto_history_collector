@@ -22,6 +22,7 @@ class KlinesRepository:
 
         Returns the id if found and active, None otherwise.
         """
+
         stmt = (
             select(ExchangeSymbol.id)
             .join(Exchange, Exchange.id == ExchangeSymbol.exchange_id)
@@ -35,6 +36,7 @@ class KlinesRepository:
             )
         )
         result = await session.execute(stmt)
+
         return result.scalar_one_or_none()
 
     @staticmethod
@@ -44,6 +46,7 @@ class KlinesRepository:
         timeframe: TimeframeEnum,
     ) -> tuple[datetime, datetime] | None:
         """Return (first, last) candle timestamps for the given symbol+timeframe, or None if no data."""
+
         stmt = select(
             func.min(Candle.timestamp),
             func.max(Candle.timestamp),
@@ -52,9 +55,11 @@ class KlinesRepository:
             Candle.timeframe == timeframe.value,
         )
         result = await session.execute(stmt)
+
         first, last = result.one()
         if first is None:
             return None
+
         return first, last
 
     @staticmethod
@@ -65,6 +70,7 @@ class KlinesRepository:
         klines: list[Kline],
     ) -> int:
         """Bulk insert klines, skipping duplicates. Returns count of inserted rows."""
+
         if not klines:
             return 0
 
@@ -84,6 +90,7 @@ class KlinesRepository:
 
         batch_size = 3000
         total_inserted = 0
+
         for i in range(0, len(rows), batch_size):
             batch = rows[i : i + batch_size]
             stmt = (
@@ -93,5 +100,6 @@ class KlinesRepository:
             )
             result = await session.execute(stmt)
             total_inserted += result.rowcount
+
         await session.commit()
         return total_inserted
